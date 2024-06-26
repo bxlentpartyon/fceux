@@ -21,6 +21,7 @@
 /* None of this code should use any of the iNES bank switching wrappers. */
 
 #include "mapinc.h"
+#include "../ines.h"
 
 #include <array>
 
@@ -1022,9 +1023,11 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	MMC5battery = battery;
 	if (battery) {
 		uint32 saveGameSize = 0;
+		uint32 saveVROMSize = 0;
 		if (info->ines2)
 		{
 			saveGameSize = info->battery_wram_size;
+			saveVROMSize = info->battery_vram_size;
 		}
 		else
 		{
@@ -1038,6 +1041,7 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 				saveGameSize = 32768;
 		}
 		info->addSaveGameBuf( WRAM, saveGameSize );
+		info->addSaveGameBuf( VROM, saveVROMSize );
 	}
 
 	MMC5HackVROMMask = CHRmask4[0];
