@@ -64,6 +64,7 @@ char LoadedRomFName[4096]; //mbg merge 7/17/06 added
 char LoadedRomFNamePatchToUse[4096];
 
 static int CHRRAMSize = -1;
+static int CHRRAMSize_Battery = 0;
 static int iNES_Init(int num);
 
 static int MapperNo = 0;
@@ -76,7 +77,7 @@ static DECLFR(TrainerRead) {
 
 static void iNES_ExecPower() {
 	if (CHRRAMSize != -1)
-		FCEU_MemoryRand(VROM, CHRRAMSize);
+		FCEU_MemoryRand(VROM + CHRRAMSize_Battery, CHRRAMSize - CHRRAMSize_Battery);
 
 	if (iNESCart.Power)
 		iNESCart.Power();
@@ -1213,12 +1214,13 @@ static int iNES_Init(int num) {
 				else
 				{
 					CHRRAMSize = iNESCart.battery_vram_size + iNESCart.vram_size;
+					CHRRAMSize_Battery = iNESCart.battery_vram_size;
 				}
 				if (CHRRAMSize > 0)
 				{
 					int mCHRRAMSize = (CHRRAMSize < 1024) ? 1024 : CHRRAMSize; // VPage has a resolution of 1k banks, ensure minimum allocation to prevent malicious access from NES software
 					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(mCHRRAMSize)) == NULL) return 2;
-					FCEU_MemoryRand(VROM, CHRRAMSize);
+					FCEU_MemoryRand(VROM + CHRRAMSize_Battery, CHRRAMSize - CHRRAMSize_Battery);
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
 					AddExState(VROM, CHRRAMSize, 0, "CHRR");
 				}
